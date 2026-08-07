@@ -61,7 +61,7 @@ export default clerkMiddleware(async (auth, req) => {
   };
 
 
-}, { debug: true });
+});
 
 
 export const config = {
