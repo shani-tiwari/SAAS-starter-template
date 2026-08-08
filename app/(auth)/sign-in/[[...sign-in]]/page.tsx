@@ -1,6 +1,7 @@
 'use client'
 
 import { useSignIn } from '@clerk/nextjs'
+import Link from 'next/link';
 import { useRouter } from 'next/navigation'
 
 export default function Page() {
@@ -8,6 +9,7 @@ export default function Page() {
   const { signIn, errors, fetchStatus } = useSignIn();
   const router = useRouter();
 
+  // console.log(errors)
 
   const handleSubmit = async (formData: FormData) => {
 
@@ -19,22 +21,18 @@ export default function Page() {
       password,
     })
 
-    if (error) {
+    if (error && errors) {
       console.error(JSON.stringify(error, null, 2))
       return;
     }
 
     try {
-
-        // const result = 
         await signIn.create({
             identifier: emailAddress, password
         });
-        // console.log('Sign-in complete:', result);
         if(signIn.status === 'complete'){
             await signIn.finalize({
                 navigate: ({ decorateUrl }) => {
-                    // createSession(session.id)
                     const url = decorateUrl('/');
                     if(url.startsWith('http')){
                         window.location.href = url
@@ -115,19 +113,28 @@ export default function Page() {
         <div>
           <label htmlFor="email">Enter email address</label>
           <input id="email" name="email" type="email" />
-          {errors.fields.identifier && <p>{errors.fields.identifier.message}</p>}
+          {/* {errors.fields.identifier && <p>{errors.fields.identifier.message}</p>} */}
         </div>
         <div>
           <label htmlFor="password">Enter password</label>
           <input id="password" name="password" type="password" />
-          {errors.fields.password && <p>{errors.fields.password.message}</p>}
+          {/* {errors.fields.password && <p>{errors.fields.password.message}</p>} */}
         </div>
         <button type="submit" disabled={fetchStatus === 'fetching'}>
           Continue
         </button>
+
+        {/* You can just console.log errors, but we put them in the UI for convenience */}
+        {errors && <p>
+          {/* {JSON.stringify(errors, null, 2)} */}
+          {/* Invalid credential  */}
+        </p>}
+
+        <div>
+          <p>Create your <Link className="text-blue-500 underline" href="/sign-up">Account</Link></p>
+        </div>
+
       </form>
-      {/* For your debugging purposes. You can just console.log errors, but we put them in the UI for convenience */}
-      {errors && <p>{JSON.stringify(errors, null, 2)}</p>}
     </>
   )
 }

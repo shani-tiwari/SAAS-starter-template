@@ -6,9 +6,9 @@ import { NextResponse } from 'next/server';
 // maybe some changes were there to make route public on clerk level
 const publicRoutes = [
   '/',
-  'api/webhook/register',
-  'sign-in',
-  'sign-up'
+  '/api/webhook/register',
+  '/sign-in',
+  '/sign-up'
 ];
 
 export default clerkMiddleware(async (auth, req) => {
@@ -18,9 +18,13 @@ export default clerkMiddleware(async (auth, req) => {
    * req.nextUrl.pathname - pathname of the current url (/sign-in)
    */
 
-  const { isAuthenticated, redirectToSignIn, userId } = await auth()
+  const { isAuthenticated, userId } = await auth()
 
-  if (!isAuthenticated && !publicRoutes.includes(req.nextUrl.pathname)) return redirectToSignIn();
+  if (!isAuthenticated && !publicRoutes.includes(req.nextUrl.pathname)){
+    // return redirectToSignIn({returnBackUrl: new URL('/sign-in', req.url)});
+    console.log('trying to redirect on sign up ', req.nextUrl.pathname)
+    return NextResponse.redirect(new URL('/sign-up', req.url));
+  } 
 
   try{
     if(userId) {
@@ -53,7 +57,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     }
 
-    // return NextResponse.next();
+    return NextResponse.next();  // when no redirect is required.
 
   }catch(error){
     console.error('Error in proxy.ts:', error);
