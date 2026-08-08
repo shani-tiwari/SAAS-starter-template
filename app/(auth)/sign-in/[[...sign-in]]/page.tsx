@@ -22,6 +22,7 @@ export default function Page() {
     })
 
     if (error && errors) {
+      console.log('error is from here only')
       console.error(JSON.stringify(error, null, 2))
       return;
     }
@@ -31,16 +32,17 @@ export default function Page() {
             identifier: emailAddress, password
         });
         if(signIn.status === 'complete'){
-            await signIn.finalize({
-                navigate: ({ decorateUrl }) => {
-                    const url = decorateUrl('/');
-                    if(url.startsWith('http')){
-                        window.location.href = url
-                    }else{
-                        router.push(url)
-                    }
-                }
-            }); 
+          router.push('/dashboard');
+            // await signIn.finalize({
+            //     navigate: ({ decorateUrl }) => {
+            //         const url = decorateUrl('/');
+            //         if(url.startsWith('http')){
+            //             window.location.href = url
+            //         }else{
+            //             router.push(url)
+            //         }
+            //     }
+            // }); 
         }
         else if (signIn.status === 'needs_second_factor') {
         } else if (signIn.status === 'needs_client_trust') {
