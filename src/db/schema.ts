@@ -7,19 +7,18 @@ import * as p from 'drizzle-orm/pg-core';
 
 // automatically map camelCase from TypeScript to snake_case in the database via a dedicated builder.
 export const user = p.pgTable("user", {
-    id: p.text(),
+    id: p.text("id").primaryKey(),
     name: p.varchar({ length: 255 }).notNull(),
     email: p.varchar({ length: 255 }).notNull().unique(),
     is_subscribed: p.boolean().default(false),
     subscription_ends: p.timestamp().notNull(), 
-    // todos: p.json()
 });
 
 
 
 export const todo = p.pgTable("todo", {
     id: p.integer().primaryKey().generatedAlwaysAsIdentity(),
-    user_id: p.integer().references(() => user.id),
+    user_id: p.text("user_id").notNull().references(() => user.id),
     title: p.varchar({ length: 255 }).notNull(),
     completed: p.boolean().default(false),
     created_at: p.timestamp(),
@@ -43,7 +42,6 @@ export const relations = defineRelations({ user, todo }, (r) => ({
 
 
 // const relations = defineRelations({ user, todo }, (r) => ({
-// 	todo: {
 // 		user: r.one.user({
 // 			from: r.todo.id,
 // 			to: r.user.id, 
