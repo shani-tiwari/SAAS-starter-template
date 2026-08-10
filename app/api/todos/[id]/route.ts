@@ -48,3 +48,56 @@ export async function DELETE(req: NextRequest,
         return NextResponse.json({error: "Internal server error"}, {status: 500});
     }
 };
+
+export async function PUT(req: NextRequest, {params}:{params: {id: string}}){
+
+    const {userId} = await auth();
+    const todoId = params.id;
+
+    if(!userId){
+        return NextResponse.json(
+            {error: "Unauthorized"},
+            {status: 401}
+        );
+    };
+
+    if(!todoId){
+        return NextResponse.json(
+            {error: "Todo id is required"},
+            {status: 400}
+        );
+    };
+
+    const {completed} = await req.json();
+    if(typeof completed !== 'boolean'){
+        return NextResponse.json(
+            {error: "Invalid request"},
+            {status: 400}
+        );
+    };
+
+    try {
+        const Todo = await db.select({
+            id: todo.id,
+            user_id: todo.user_id,
+        }).from(todo).where(eq(todo.id, Number(todoId)));
+
+        if(!Todo[0]){
+            return NextResponse.json({error: "Todo not found"}, {status: 404});
+        };
+
+        if(Todo[0].user_id !== userId){
+            return NextResponse.json({error: "Unauthorized"}, {status: 401});
+        };
+
+        await db.update(todo).set({
+            completed
+        }).where(eq(todo.id, Number(todoId)));
+
+        return NextResponse.json({success: true, todo: Todo}, {status: 200});
+        
+    }catch(e){
+        return NextResponse.json({error: "Internal server error"}, {status: 500});
+    }
+    
+}

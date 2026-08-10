@@ -13,12 +13,13 @@ export async function GET(req: NextRequest){
     };
 
     const {searchParams} = new URL(req.url);
+    const search = searchParams.get("search") || "";
 
     try {
 
         const todos = await db.query.todo.findMany({
             where: {user_id: userId, 
-                title: {like: `%${searchParams}%`}
+                title: {like: `%${search}%`}
 
             },
             orderBy : {created_at: 'desc'},
