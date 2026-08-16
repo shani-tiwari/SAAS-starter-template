@@ -1,15 +1,10 @@
 import { drizzle } from "drizzle-orm/neon-http";
-import {relations} from "./schema";
+import { neon } from "@neondatabase/serverless";
+import { relations } from "./schema";
 
-// client DB URL()Neon DB
-const db = drizzle(
-    process.env.DATABASE_URL || '', 
-    {
-        // schema: { user, todo },
-        relations
-    }
-);
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle({ client: sql, relations: relations }); 
 
-
+// await db.execute('select 1');
 
 export default db;

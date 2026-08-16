@@ -30,7 +30,8 @@ export async function GET(req: NextRequest){
         return NextResponse.json({
             message: "Todos fetched successfully",
             todos,
-            count
+            count,
+            success: true
         });
 
     } catch (error) {
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest){
         updated_at: new Date()
     });
 
-    return NextResponse.json({ message: "Todo created successfully" });
+    return NextResponse.json({ message: "Todo created successfully", success: true });
 
     
 };

@@ -1,10 +1,14 @@
-import db from "@/src/db";
-import { user } from "@/src/db/schema";
-import { auth, clerkClient } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
+// import db from "@/src/db";
+// import { user } from "@/src/db/schema";
+import { 
+    // auth,
+     clerkClient } from "@clerk/nextjs/server";
+// import { eq } from "drizzle-orm";
+// import { NextRequest, NextResponse } from "next/server"; 
 
-async function isAdmin(userId: string){
+
+
+export default async function isAdmin(userId: string){
     const clerk = await clerkClient();
     const user = await clerk.users.getUser(userId);
     const userRole = user.publicMetadata.role as string | undefined;

@@ -4,6 +4,8 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
+
+
 export async function POST() {
 
   const { userId } = await auth();
@@ -14,9 +16,9 @@ export async function POST() {
   // capture payment---
 
   try {
-    const User = await db.select().from(user).where(eq(user.id, userId));
+    const User = await db.select().from(user).where(eq(user.id, userId));  // select- return array
 
-    if (!User) {
+    if (!User[0] || User.length === 0) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -24,13 +26,10 @@ export async function POST() {
     const subscriptionEnds = new Date();
     subscriptionEnds.setMonth(subscriptionEnds.getMonth() + 1);
 
-    const updatedUser = await db
-      .update(user)
-      .set({
+    const updatedUser = await db.update(user).set({
         is_subscribed: true,
         subscription_ends: subscriptionEnds,
-      })
-      .where(eq(user.id, userId));
+      }).where(eq(user.id, userId));
 
     return NextResponse.json({
       message: "Subscription updated successfully",
@@ -51,7 +50,6 @@ export async function GET() {
 
   try {
     const User = await db.query.user.findFirst({
-        // where: eq(user.id, userId),
         where: {id: userId},
         columns: {
             id: true,

@@ -1,6 +1,7 @@
 // import { integer, pgTable, varchar, boolean, timestamp, json } from "drizzle-orm/pg-core";
 // import { drizzle } from 'drizzle-orm/neon-http';
 import { defineRelations } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/neon-http";
 import * as p from "drizzle-orm/pg-core";
 
 // automatically map camelCase from TypeScript to snake_case in the database via a dedicated builder.
@@ -37,6 +38,8 @@ export const relations = defineRelations({ user, todo }, (r) => ({
     todos: r.many.todo(),
   },
 }));
+
+// drizzle({ client, relations });
 
 // const relations = defineRelations({ user, todo }, (r) => ({
 // 		user: r.one.user({

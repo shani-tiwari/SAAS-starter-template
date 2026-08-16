@@ -15,46 +15,41 @@ export default function SignUp() {
 
     const handleSubmit = async (formData: FormData) => {
 
-        const emailAddress = formData.get('email') as string
-        const password = formData.get('password') as string
+        const emailAddress = formData.get('email') as string;
+        const password = formData.get('password') as string;
 
-        const { error } = await signUp.password({
-            emailAddress,
-            password,
-        });
+        const { error } = await signUp.password({ emailAddress, password });
+
         if (error) {
-            console.log(error.message);
-            // console.error(JSON.stringify(error, null, 2));
+            console.log(error?.message);
             return;
         };
 
         if (!error) await signUp.verifications.sendEmailCode();
         setVerifying(true);
+
     };
 
 
     const handleVerify = async (formData: FormData) => {
-        const code = formData.get('code') as string;
 
-        await signUp.verifications.verifyEmailCode({
-            code,
-        })
+        const code = formData.get('code') as string;
+        const {error} = await signUp.verifications.verifyEmailCode({ code });
+        if (error) {
+            console.error(error);
+            return;
+        };
+
         if (signUp.status === 'complete') {
             await signUp.finalize({
                 // Redirect the user to the home page after sign up
-                navigate: ({ decorateUrl }) => {
-                    const url = decorateUrl('/')
-                    if (url.startsWith('http')) {
-                        window.location.href = url
-                    } else {
-                        router.push(url)
-                    }
-                },
+                navigate: () => router.push('/'), 
             })
         } else {
             // Check why the sign-up is not complete
-            console.error('Sign-up attempt not complete:', signUp)
-        }
+            console.error('Sign-up attempt not complete:', signUp.status);
+        };
+
     };
 
 
@@ -97,23 +92,17 @@ export default function SignUp() {
                 <div>
                     <label htmlFor="email">Enter email address</label>
                     <input id="email" type="email" name="email" />
-                    {/* {errors.fields.emailAddress && <p>{errors.fields.emailAddress.message}</p>} */}
+                    {errors.fields.emailAddress && <p>{errors.fields.emailAddress.message}</p>}
                 </div>
                 <div>
                     <label htmlFor="password">Enter password</label>
                     <input id="password" type="password" name="password" />
-                    {/* {errors.fields.password && <p>{errors.fields.password.message}</p>} */}
+                    {errors.fields.password && <p>{errors.fields.password.message}</p>}
                 </div>
                 <button type="submit" disabled={fetchStatus === 'fetching'}>
                     Continue
                 </button>
             </form>
-
-            {/* You can just console.log errors, but we put them in the UI for convenience */}
-            {/* {errors && <p>{JSON.stringify(errors, null, 2)}</p>} */}
-
-            {/* Required for sign-up flows. Clerk's bot sign-up protection is enabled by default */}
-            {/* <div id="clerk-captcha" /> */}
 
         </>
     )

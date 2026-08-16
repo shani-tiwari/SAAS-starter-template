@@ -4,8 +4,12 @@ import { WebhookEvent } from "@clerk/nextjs/server";
 import db from "@/src/db/index";
 import { user } from "@/src/db/schema";
 
+
+
 export async function POST(req: Request) {
+
   const webhook_secret = process.env.WEBHOOK_SECRET;
+
   if (!webhook_secret) {
     throw new Error("please add webhook secret in env");
   }
@@ -48,10 +52,11 @@ export async function POST(req: Request) {
 
       const primaryEmail = email_addresses.find(
         (email) => email.id === primary_email_address_id,
-      );
+      ); 
 
       if (!primaryEmail) {
-        throw new Response("primary email not found", { status: 404 });
+        // throw new Response("primary email not found", { status: 404 });
+        return new Response("primary email not found", { status: 404 });
       }
 
       // create user in db(drizzle)
@@ -72,4 +77,5 @@ export async function POST(req: Request) {
   }
 
   return new Response("success", { status: 200 });
-}
+
+};

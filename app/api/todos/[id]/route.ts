@@ -6,11 +6,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 
 export async function DELETE(req: NextRequest, 
-    {searchParams}: {searchParams: URLSearchParams}
+    {params}: {params: URLSearchParams}
 ){
 
     const {userId} =  await auth();
-    const todoId = searchParams.get("id");
+    const todoId = params.get("id");
 
     if (!userId) {
         return NextResponse.json(
@@ -42,7 +42,7 @@ export async function DELETE(req: NextRequest,
 
         await db.delete(todo).where(eq(todo.id, Number(todoId)));
 
-        return NextResponse.json({message: "Todo deleted successfully"});
+        return NextResponse.json({message: "Todo deleted successfully", success: true});
         
     }catch(err){
         return NextResponse.json({error: "Internal server error"}, {status: 500});

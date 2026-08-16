@@ -42,15 +42,19 @@ export default function Dashboard() {
   }, [debounceSearchTerm]);
 
   useEffect(() => {
+
     const fetchSubscription = async() => {
-        const res = await fetch("/api/subscription");
-        if(!res.ok){
-            throw new Error("Failed to fetch subscription");
-        }
-        const json = await res.json();
-        if(json.success){
-            setIsSubscription(json.isSubscribed);
-        }
+      const res = await fetch("/api/subscription");
+
+      if(!res.ok){
+          throw new Error("Failed to fetch subscription");
+      }
+      const json = await res.json();
+      
+      if(json.success){
+        setIsSubscription(json.isSubscribed);
+      };
+
     };
 
     fetchSubscription();
@@ -128,6 +132,8 @@ export default function Dashboard() {
   return (
     <div className="text-white">
       <h1>Dashboard</h1>
+      <h2>{user?.emailAddresses?.[0].emailAddress}</h2>
+      <h2>{isSubscribe ? "Subscribed" : "Not Subscribed"}</h2>
     </div>
   );
 }
