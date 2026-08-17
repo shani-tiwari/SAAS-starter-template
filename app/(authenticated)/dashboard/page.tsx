@@ -1,10 +1,11 @@
 "use client";
-"/dashboard";
 
 import { useUser } from "@clerk/nextjs";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { todo } from "../../../src/db/schema";
 import { useDebounceValue } from "usehooks-ts";
+
+
 
 export default function Dashboard() {
   const { user } = useUser();
@@ -18,18 +19,14 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchTodos = async () => {
       try {
+
         setLoading(true);
 
         const res = await fetch(`/api/todos?search=${encodeURIComponent(debounceSearchTerm)}`);
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch todos");
-        }
+        if (!res.ok) throw new Error("Failed to fetch todos");
 
         const json = await res.json();
-        if (json.success) {
-          setTodos(json.todos);
-        }
+        if (json.success) setTodos(json.todos);
 
       } catch (e) {
         console.error(e);
@@ -46,14 +43,10 @@ export default function Dashboard() {
     const fetchSubscription = async() => {
       const res = await fetch("/api/subscription");
 
-      if(!res.ok){
-          throw new Error("Failed to fetch subscription");
-      }
+      if(!res.ok) throw new Error("Failed to fetch subscription");
       const json = await res.json();
       
-      if(json.success){
-        setIsSubscription(json.isSubscribed);
-      };
+      if(json.success) setIsSubscription(json.isSubscribed);
 
     };
 
@@ -77,7 +70,7 @@ export default function Dashboard() {
         };
     
         const json = await res.json();
-        if(json.success){ setTodos([...todos, json.todo]) };
+        if(json.success){ setTodos([...todos, json.todos]) };
         
     } catch (error) {
         alert(`Failed to add todo: ${(error as Error).message}`);

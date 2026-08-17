@@ -2,14 +2,14 @@ import db from "@/src/db";
 import { todo } from "@/src/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 
 export async function GET(req: NextRequest){
 
     const { userId } = await auth();
     if (!userId) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return Response.json({ error: "Unauthorized" }, { status: 401 });
     };
 
     const {searchParams} = new URL(req.url);
@@ -20,22 +20,21 @@ export async function GET(req: NextRequest){
         const todos = await db.query.todo.findMany({
             where: {user_id: userId, 
                 title: {like: `%${search}%`}
-
             },
             orderBy : {created_at: 'desc'},
         });
 
         const count = await db.$count(todo, eq(todo.user_id, userId));
 
-        return NextResponse.json({
+        return Response.json({
             message: "Todos fetched successfully",
             todos,
             count,
             success: true
-        });
+        }, {status: 200});
 
     } catch (error) {
-        return NextResponse.json({ error: `Error in Server ${error}` }, { status: 500 });
+        return Response.json({ error: `Error in Server ${error}` }, { status: 500 });
     };
 
 };
@@ -44,7 +43,7 @@ export async function GET(req: NextRequest){
 export async function POST(req: NextRequest){
     const {userId} = await auth();
     if (!userId) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return Response.json({ error: "Unauthorized" }, { status: 401 });
     };
 
     const User = await db.query.user.findFirst({
@@ -54,13 +53,16 @@ export async function POST(req: NextRequest){
         },
     });
     if (!User){
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return Response.json({ error: "Unauthorized" }, { status: 401 });
     };
     if(!User.is_subscribed && User.todos.length >= 3){
-        return NextResponse.json({ error: "Please upgrade your subscription to create more todos" }, { status: 401 });
+        return Response.json({ error: "Please upgrade your subscription to create more todos" }, { status: 401 });
     }
 
     const {title} = await req.json();
+    
+    const {searchParams} = new URL(req.url);
+    const search = searchParams.get("search") || "";
 
     await db.insert(todo).values({
         title,
@@ -68,8 +70,14 @@ export async function POST(req: NextRequest){
         created_at: new Date(),
         updated_at: new Date()
     });
+    const todos = await db.query.todo.findMany({
+            where: {user_id: userId, 
+                title: {like: `%${search}%`}
+            },
+            orderBy : {created_at: 'desc'},
+    });
 
-    return NextResponse.json({ message: "Todo created successfully", success: true });
+    return Response.json({ message: "Todo created successfully", success: true, todos: todos });
 
     
 };

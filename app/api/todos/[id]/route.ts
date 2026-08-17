@@ -6,21 +6,22 @@ import { NextRequest, NextResponse } from "next/server";
 
 
 export async function DELETE(req: NextRequest, 
-    {params}: {params: URLSearchParams}
+    // {params}: {params: URLSearchParams}
+    {params}: {params: Promise<{id: string}>}
 ){
 
     const {userId} =  await auth();
-    const todoId = params.get("id");
+    const {id: todoId} = await params;
 
     if (!userId) {
-        return NextResponse.json(
+        return Response.json(
             { error: "Unauthorized" },
             { status: 401 }
         );
     }
 
     if (!todoId) {
-        return NextResponse.json(
+        return Response.json(
             { error: "Todo id is required" },
             { status: 400 }
         );
@@ -33,19 +34,19 @@ export async function DELETE(req: NextRequest,
         }).from(todo).where(eq(todo.id, Number(todoId)));
 
         if(!Todo[0]){
-            return NextResponse.json({error: "Todo not found"}, {status: 404});
+            return Response.json({error: "Todo not found"}, {status: 404});
         };
 
         if(Todo[0].user_id != userId){
-            return NextResponse.json({error: "Unauthorized"}, {status: 401});
+            return Response.json({error: "Unauthorized"}, {status: 401});
         };
 
         await db.delete(todo).where(eq(todo.id, Number(todoId)));
 
-        return NextResponse.json({message: "Todo deleted successfully", success: true});
+        return Response.json({message: "Todo deleted successfully", success: true});
         
     }catch(err){
-        return NextResponse.json({error: "Internal server error"}, {status: 500});
+        return Response.json({error: "Internal server error"}, {status: 500});
     }
 };
 
@@ -62,7 +63,7 @@ export async function PUT(req: NextRequest, {params}:{params: {id: string}}){
     };
 
     if(!todoId){
-        return NextResponse.json(
+        return Response.json(
             {error: "Todo id is required"},
             {status: 400}
         );
@@ -70,34 +71,32 @@ export async function PUT(req: NextRequest, {params}:{params: {id: string}}){
 
     const {completed} = await req.json();
     if(typeof completed !== 'boolean'){
-        return NextResponse.json(
+        return Response.json(
             {error: "Invalid request"},
             {status: 400}
         );
     };
 
     try {
-        const Todo = await db.select({
+        /**handleUpdateTodo receives json.todo which returns the old un-updated todo from db.select(). */
+        const Todo = await db.select({ 
             id: todo.id,
             user_id: todo.user_id,
         }).from(todo).where(eq(todo.id, Number(todoId)));
 
-        if(!Todo[0]){
-            return NextResponse.json({error: "Todo not found"}, {status: 404});
-        };
+        if(!Todo[0]) return Response.json({error: "Todo not found"}, {status: 404});
+        
+        if(Todo[0].user_id !== userId) return Response.json({error: "Unauthorized"}, {status: 401});
 
-        if(Todo[0].user_id !== userId){
-            return NextResponse.json({error: "Unauthorized"}, {status: 401});
-        };
 
         await db.update(todo).set({
             completed
         }).where(eq(todo.id, Number(todoId)));
 
-        return NextResponse.json({success: true, todo: Todo}, {status: 200});
+        return Response.json({success: true, todo: Todo}, {status: 200});
         
     }catch(e){
-        return NextResponse.json({error: "Internal server error"}, {status: 500});
+        return Response.json({error: "Internal server error", err: e}, {status: 500});
     }
     
 }

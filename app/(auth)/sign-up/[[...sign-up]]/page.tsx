@@ -2,7 +2,7 @@
 
 import { useAuth, useSignUp } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 
 export default function SignUp() {
@@ -52,13 +52,11 @@ export default function SignUp() {
 
     };
 
+    useEffect(() => {
+        if (signUp.status === 'complete' || isSignedIn) 
+            return router.push('/dashboard');
+    }, [isSignedIn, router, signUp.status]);
 
-
-    if (signUp.status === 'complete' || isSignedIn) {
-        // return router.push('/dashboard')
-        router.push('/dashboard');
-        // NextResponse.redirect(new URL('/dashboard', baseURL)) --- for Server Components onlly
-    }
 
     if (verifying && signUp.status === 'missing_requirements' && 
         signUp.unverifiedFields.includes('email_address') &&

@@ -1,6 +1,6 @@
 import { clerkMiddleware } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server';
-// clerkClient - easier to interact with the API
+
 
 
 const publicRoutes = [
@@ -10,12 +10,8 @@ const publicRoutes = [
   '/sign-up'
 ];
 
-export default clerkMiddleware(async (auth, req) => {
 
-  /**
-   * req.url - full url (https://localhost:3000/sign-in)
-   * req.nextUrl.pathname - pathname of the current url (/sign-in)
-   */
+export default clerkMiddleware(async (auth, req) => {
 
   const { isAuthenticated, userId, sessionClaims } = await auth()
 
@@ -28,9 +24,6 @@ export default clerkMiddleware(async (auth, req) => {
   try{
     if(userId) {
 
-      // const clerk = await clerkClient();
-      // const user = await clerk.users.getUser(userId);
-      // const userRole = user.publicMetadata.role as string | undefined;
       const userRole = sessionClaims?.role;
 
       // admin user
@@ -51,7 +44,8 @@ export default clerkMiddleware(async (auth, req) => {
       // redirect auth users trying to use public routes
       if(publicRoutes.includes(req.nextUrl.pathname)){
         return NextResponse.redirect(new URL(
-          userRole === 'admin' ? '/admin/dashboard' : '/dashboard'
+          userRole === 'admin' ? '/admin/dashboard' : '/dashboard',
+          req.url
         )); 
       }
 

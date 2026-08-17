@@ -4,7 +4,8 @@ import { WebhookEvent } from "@clerk/nextjs/server";
 import db from "@/src/db/index";
 import { user } from "@/src/db/schema";
 
-
+// needed when our own backend/database needs to know about event happening in Clerk.
+// webhook setup via Clerk - so it trigger `user.created` to let us do operation on data.
 
 export async function POST(req: Request) {
 
@@ -20,14 +21,20 @@ export async function POST(req: Request) {
   const svix_signature = header.get("svix-signature") ?? "";
 
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    throw new Response("svix headers not found", {
-      status: 400,
-    });
-  }
+    return Response.json(
+        {error: "svix headers not found"},
+        {status: 400}
+    );
+  };
 
   // payload - data , comes from clerk
-  const payload = await req.json();
-  const body = JSON.stringify(payload);
+
+  // 2 ways to get body data
+  // const payload = await req.json();
+  // const body = JSON.stringify(payload);  
+
+  // or 
+  const body = await req.text();
 
   const wh = new Webhook(webhook_secret);
 
